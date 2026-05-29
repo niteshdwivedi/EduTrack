@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AppInsightsSettings">
-    <option name="selectedTabId" value="Firebase Crashlytics" />
+    <option name="selectedTabId" value="Android vitals" />
     <option name="tabSettings">
       <map>
         <entry key="Firebase Crashlytics">
@@ -10,16 +10,10 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.edutrack" />
-                  <option name="mobileSdkAppId" value="1:461645627178:android:abb17c248c0f27acf96853" />
-                  <option name="projectId" value="edutrack-b8e03233" />
-                  <option name="projectNumber" value="461645627178" />
+                  <option name="mobileSdkAppId" value="1:718887267639:android:6460daad9258dc7771feb2" />
+                  <option name="projectId" value="edutrackers-7d62d" />
+                  <option name="projectNumber" value="718887267639" />
                 </ConnectionSetting>
-              </option>
-              <option name="failureTypes">
-                <list>
-                  <option value="ANR" />
-                  <option value="NON_FATAL" />
-                </list>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />

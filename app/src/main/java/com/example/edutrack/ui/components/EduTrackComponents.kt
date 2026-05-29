@@ -48,13 +48,17 @@ fun EduTrackTextField(
     label: String,
     modifier: Modifier = Modifier,
     leadingIcon: ImageVector? = null,
+    placeholder: String? = null,
+    enabled: Boolean = true,
     visualTransformation: androidx.compose.ui.text.input.VisualTransformation = androidx.compose.ui.text.input.VisualTransformation.None
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
+        placeholder = placeholder?.let { { Text(it, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)) } },
         modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
         shape = RoundedCornerShape(12.dp),
         leadingIcon = leadingIcon?.let {
             { Icon(imageVector = it, contentDescription = null) }

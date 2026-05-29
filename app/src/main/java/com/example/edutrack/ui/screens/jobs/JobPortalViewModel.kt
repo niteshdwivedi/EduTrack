@@ -30,16 +30,49 @@ class JobPortalViewModel @Inject constructor(
             _isLoading.value = true
             val data = repository.getJobs()
             if (data.isEmpty()) {
-                // Initial dummy data if Firestore is empty
-                _jobs.value = listOf(
-                    Job("1", "Junior Android Developer", "TechCorp", "Remote", "Full-time"),
-                    Job("2", "Software Engineer Intern", "InnovateID", "New York", "Internship"),
-                    Job("3", "Kotlin Backend Developer", "CloudScale", "London", "Full-time")
-                )
+                _jobs.value = getMockJobs()
             } else {
                 _jobs.value = data
             }
             _isLoading.value = false
         }
+    }
+
+    private fun getMockJobs(): List<Job> {
+        return listOf(
+            Job(
+                jobId = "JOB001",
+                role = "Cloud Engineer",
+                company = "Cognizant",
+                location = "Remote",
+                packageVal = "32 LPA",
+                skills = "AWS, Docker",
+                lastDate = "15-06-2026",
+                applyLink = "https://careers.infosys.com",
+                campusType = "On Campus"
+            ),
+            Job(
+                jobId = "JOB002",
+                role = "Android Developer",
+                company = "Capgemini",
+                location = "Remote",
+                packageVal = "18 LPA",
+                skills = "Python, ML",
+                lastDate = "25-07-2026",
+                applyLink = "https://careers.infosys.com",
+                campusType = "Off Campus"
+            ),
+            Job(
+                jobId = "JOB003",
+                role = "Android Developer",
+                company = "IBM",
+                location = "Bangalore",
+                packageVal = "19 LPA",
+                skills = "React, Node",
+                lastDate = "16-07-2026",
+                applyLink = "https://careers.infosys.com",
+                campusType = "On Campus"
+            )
+        )
     }
 }

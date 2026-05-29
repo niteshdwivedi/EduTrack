@@ -28,8 +28,7 @@ class NotesViewModel @Inject constructor(
     fun loadNotes() {
         viewModelScope.launch {
             _isLoading.value = true
-            val userId = "dummy_user"
-            val data = repository.getNotes(userId)
+            val data = repository.getNotes()
             if (data.isEmpty()) {
                 _notes.value = getMockNotes()
             } else {
@@ -41,18 +40,18 @@ class NotesViewModel @Inject constructor(
 
     private fun getMockNotes(): List<Note> {
         return listOf(
-            Note("1", "Java Basics", "Introduction to OOP concepts, classes, and objects.", "Advanced Java", "Nov 10, 2023", 0xFFFFE0B2),
-            Note("2", "OS Scheduling", "Process scheduling algorithms: FCFS, SJF, Round Robin.", "Operating Systems", "Nov 12, 2023", 0xFFC8E6C9),
-            Note("3", "SQL Queries", "Complex joins, subqueries and indexing strategies.", "Database Systems", "Nov 14, 2023", 0xFFBBDEFB),
-            Note("4", "Kotlin Coroutines", "Structured concurrency and suspend functions.", "Mobile Dev", "Nov 15, 2023", 0xFFF8BBD0),
-            Note("5", "Networking Layers", "OSI Model and TCP/IP stack explanation.", "Computer Networks", "Nov 15, 2023", 0xFFD1C4E9)
+            Note(noteId = "1", title = "Java Basics", content = "Introduction to OOP concepts, classes, and objects.", subject = "Advanced Java", date = "Nov 10, 2023", color = 0xFFFFE0B2),
+            Note(noteId = "2", title = "OS Scheduling", content = "Process scheduling algorithms: FCFS, SJF, Round Robin.", subject = "Operating Systems", date = "Nov 12, 2023", color = 0xFFC8E6C9),
+            Note(noteId = "3", title = "SQL Queries", content = "Complex joins, subqueries and indexing strategies.", subject = "Database Systems", date = "Nov 14, 2023", color = 0xFFBBDEFB),
+            Note(noteId = "4", title = "Kotlin Coroutines", content = "Structured concurrency and suspend functions.", subject = "Mobile Dev", date = "Nov 15, 2023", color = 0xFFF8BBD0),
+            Note(noteId = "5", title = "Networking Layers", content = "OSI Model and TCP/IP stack explanation.", subject = "Computer Networks", date = "Nov 15, 2023", color = 0xFFD1C4E9)
         )
     }
 
     fun addNote(title: String, content: String, subject: String) {
         viewModelScope.launch {
             val note = Note(
-                id = System.currentTimeMillis().toString(),
+                noteId = System.currentTimeMillis().toString(),
                 title = title,
                 content = content,
                 subject = subject,

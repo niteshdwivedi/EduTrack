@@ -3,6 +3,7 @@ package com.example.edutrack.ui.screens.search
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,6 +23,10 @@ fun SearchScreen(
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
+
+    val topChips = listOf(
+        "Attendance", "Timetable", "Teacher Absent", "Exams", "Notes"
+    )
 
     Scaffold(
         topBar = {
@@ -49,23 +54,35 @@ fun SearchScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            items(searchResults) { item ->
-                ListItem(
-                    headlineContent = { Text(item) },
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .clickable { 
-                            // In a real app, map the item to its specific route
-                            // For this project, we can just log or navigate if needed
-                        }
-                )
-                HorizontalDivider()
+        Column(modifier = Modifier.padding(padding)) {
+            // Clickable Quick Chips as requested
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(topChips) { chipName ->
+                    AssistChip(
+                        onClick = { viewModel.onSearchQueryChanged(chipName) },
+                        label = { Text(chipName) }
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                items(searchResults) { item ->
+                    ListItem(
+                        headlineContent = { Text(item.name) },
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
+                            .clickable { 
+                                navController.navigate(item.route)
+                            }
+                    )
+                    HorizontalDivider()
+                }
             }
         }
     }

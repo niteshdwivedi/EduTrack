@@ -14,10 +14,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.edutrack.data.datastore.SettingsDataStore
 import com.example.edutrack.ui.navigation.NavGraph
 import com.example.edutrack.ui.theme.EduTrackTheme
+import com.example.edutrack.worker.AssignmentReminderWorker
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -38,6 +43,8 @@ class MainActivity : ComponentActivity() {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
+        scheduleReminders()
+
         setContent {
             val isDarkMode by settingsDataStore.isDarkMode.collectAsState(initial = false)
 
@@ -51,5 +58,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun scheduleReminders() {
+        val workRequest = PeriodicWorkRequestBuilder<AssignmentReminderWorker>(
+            24, TimeUnit.HOURS
+        ).build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "assignment_reminder",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
     }
 }

@@ -1,6 +1,10 @@
 package com.example.edutrack.ui.screens.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,11 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import com.example.edutrack.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +37,19 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val user by viewModel.user.collectAsState()
+    var isEditing by remember { mutableStateOf(false) }
+    var phoneNumber by remember { mutableStateOf("") }
+    var profileImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        profileImageUri = uri
+    }
+
+    LaunchedEffect(user) {
+        user?.let { phoneNumber = it.phone.toString() }
+    }
 
     Scaffold(
         topBar = {
@@ -40,8 +61,8 @@ fun ProfileScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Edit Profile */ }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    IconButton(onClick = { isEditing = !isEditing }) {
+                        Icon(if (isEditing) Icons.Default.Save else Icons.Default.Edit, contentDescription = "Edit")
                     }
                 }
             )
@@ -57,14 +78,34 @@ fun ProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // Profile Image Placeholder
+                // Profile Image with Picking functionality
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .clickable { launcher.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                    if (profileImageUri != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(profileImageUri),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                    }
+                    
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                            .padding(4.dp)
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -78,13 +119,30 @@ fun ProfileScreen(
                     ProfileInfoItem(icon = Icons.Default.Email, label = "Email", value = it.email)
                     ProfileInfoItem(icon = Icons.Default.School, label = "Course", value = it.course)
                     ProfileInfoItem(icon = Icons.Default.CalendarMonth, label = "Semester", value = it.semester.toString())
-                    ProfileInfoItem(icon = Icons.Default.Phone, label = "Phone", value = it.phone)
+                    
+                    if (isEditing) {
+                        OutlinedTextField(
+                            value = phoneNumber,
+                            onValueChange = { phoneNumber = it },
+                            label = { Text("Phone Number") },
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    } else {
+                        ProfileInfoItem(icon = Icons.Default.Phone, label = "Phone", value = phoneNumber.ifEmpty { it.phone.toString() })
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
                 Button(
-                    onClick = { /* Logout */ },
+                    onClick = { 
+                        viewModel.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     shape = RoundedCornerShape(12.dp)

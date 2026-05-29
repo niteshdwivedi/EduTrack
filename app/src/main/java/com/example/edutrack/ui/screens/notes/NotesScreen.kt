@@ -21,12 +21,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.edutrack.data.model.Note
 
+import android.content.Context
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesScreen(
     navController: NavHostController,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -84,9 +89,21 @@ fun NotesScreen(
                     verticalItemSpacing = 12.dp
                 ) {
                     items(filteredNotes) { note ->
-                        NoteCard(note) {
-                            // Navigate to Edit Note
-                        }
+                        NoteCard(
+                            note = note,
+                            onShare = {
+                                val sendIntent: Intent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_TEXT, "${note.title}\n\n${note.content}")
+                                    type = "text/plain"
+                                }
+                                val shareIntent = Intent.createChooser(sendIntent, null)
+                                context.startActivity(shareIntent)
+                            },
+                            onClick = {
+                                // Navigate to Edit Note
+                            }
+                        )
                     }
                 }
             }
@@ -95,7 +112,7 @@ fun NotesScreen(
 }
 
 @Composable
-fun NoteCard(note: Note, onClick: () -> Unit) {
+fun NoteCard(note: Note, onShare: () -> Unit, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,15 +123,33 @@ fun NoteCard(note: Note, onClick: () -> Unit) {
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            if (note.subject.isNotEmpty()) {
-                Text(
-                    text = note.subject,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                if (note.subject.isNotEmpty()) {
+                    Text(
+                        text = note.subject,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                IconButton(
+                    onClick = onShare,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = "Share",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = note.title,
                 style = MaterialTheme.typography.titleMedium,

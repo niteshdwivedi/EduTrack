@@ -28,19 +28,26 @@ fun SplashScreen(
 ) {
     val scale = remember { Animatable(0f) }
 
-    LaunchedEffect(key1 = true) {
-        scale.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 1000)
-        )
-        delay(1000)
-        if (viewModel.isUserLoggedIn) {
-            navController.navigate(Screen.Dashboard.route) {
-                popUpTo(Screen.Splash.route) { inclusive = true }
-            }
-        } else {
-            navController.navigate(Screen.Login.route) {
-                popUpTo(Screen.Splash.route) { inclusive = true }
+    LaunchedEffect(viewModel.isLoading) {
+        if (!viewModel.isLoading) {
+            scale.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 1000)
+            )
+            delay(500)
+            if (viewModel.isUserLoggedIn) {
+                val route = when(viewModel.userRole) {
+                    "ADMIN" -> Screen.AdminDashboard.route
+                    "TEACHER" -> Screen.TeacherDashboard.route
+                    else -> Screen.Dashboard.route
+                }
+                navController.navigate(route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
+            } else {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
             }
         }
     }

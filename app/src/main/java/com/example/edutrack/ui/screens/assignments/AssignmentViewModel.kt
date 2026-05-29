@@ -2,17 +2,20 @@ package com.example.edutrack.ui.screens.assignments
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.edutrack.data.datastore.SettingsDataStore
 import com.example.edutrack.data.model.Assignment
 import com.example.edutrack.data.repository.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AssignmentViewModel @Inject constructor(
-    private val repository: FirestoreRepository
+    private val repository: FirestoreRepository,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     private val _assignments = MutableStateFlow<List<Assignment>>(emptyList())
@@ -28,8 +31,8 @@ class AssignmentViewModel @Inject constructor(
     fun loadAssignments() {
         viewModelScope.launch {
             _isLoading.value = true
-            val userId = "dummy_user" // In a real app, get from Auth
-            val data = repository.getAssignments(userId)
+            val regNum = settingsDataStore.registrationNumber.first() ?: "12317648"
+            val data = repository.getAssignments(regNum)
             if (data.isEmpty()) {
                 _assignments.value = listOf(
                     Assignment("1", "Calculus Homework", "Mathematics", "2023-11-20", "Pending"),

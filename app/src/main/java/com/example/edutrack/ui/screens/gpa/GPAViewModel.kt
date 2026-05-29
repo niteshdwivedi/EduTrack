@@ -9,14 +9,25 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GPAViewModel @Inject constructor() : ViewModel() {
-    private val _courses = MutableStateFlow(listOf(CourseGrade(id = "1")))
+    private val _courses = MutableStateFlow(listOf(
+        CourseGrade("1", "Advanced Java", "4", "A"),
+        CourseGrade("2", "Operating Systems", "4", "B+"),
+        CourseGrade("3", "Database Systems", "3", "A-")
+    ))
     val courses: StateFlow<List<CourseGrade>> = _courses
 
-    private val _gpa = MutableStateFlow(0.0)
-    val gpa: StateFlow<Double> = _gpa
+    private val _tgpa = MutableStateFlow(0.0)
+    val tgpa: StateFlow<Double> = _tgpa
+    
+    private val _cgpa = MutableStateFlow(9.2) // Mock CGPA out of 10
+    val cgpa: StateFlow<Double> = _cgpa
+
+    init {
+        calculateGPA()
+    }
 
     fun addCourse() {
-        val newCourse = CourseGrade(id = System.currentTimeMillis().toString())
+        val newCourse = CourseGrade(id = System.currentTimeMillis().toString(), credits = "4")
         _courses.value = _courses.value + newCourse
     }
 
@@ -43,12 +54,25 @@ class GPAViewModel @Inject constructor() : ViewModel() {
         var totalCredits = 0.0
         
         _courses.value.forEach { course ->
-            val credits = course.credits.toDoubleOrNull() ?: 0.0
-            val gradePoint = course.grade.toDoubleOrNull() ?: 0.0
+            val credits = course.credits?.toString()?.toDoubleOrNull() ?: 0.0
+            val gradePoint = gradeToPoints(course.grade)
             totalPoints += gradePoint * credits
             totalCredits += credits
         }
         
-        _gpa.value = if (totalCredits > 0) totalPoints / totalCredits else 0.0
+        _tgpa.value = if (totalCredits > 0) totalPoints / totalCredits else 0.0
+    }
+
+    private fun gradeToPoints(grade: String): Double {
+        return when(grade.uppercase()) {
+            "O", "A+" -> 10.0
+            "A" -> 9.0
+            "B+" -> 8.0
+            "B" -> 7.0
+            "C+" -> 6.0
+            "C" -> 5.0
+            "D" -> 4.0
+            else -> 0.0
+        }
     }
 }

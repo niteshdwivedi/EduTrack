@@ -2,22 +2,29 @@ package com.example.edutrack.ui.screens.attendance
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.edutrack.data.datastore.SettingsDataStore
 import com.example.edutrack.data.model.AttendanceRecord
 import com.example.edutrack.data.model.SubjectAttendance
 import com.example.edutrack.data.repository.FirestoreRepository
+import com.example.edutrack.util.AttendanceUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AttendanceViewModel @Inject constructor(
-    private val repository: FirestoreRepository
+    private val repository: FirestoreRepository,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     private val _subjects = MutableStateFlow<List<SubjectAttendance>>(emptyList())
     val subjects: StateFlow<List<SubjectAttendance>> = _subjects
+
+    private val _overallPercentage = MutableStateFlow(0)
+    val overallPercentage: StateFlow<Int> = _overallPercentage
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -29,13 +36,13 @@ class AttendanceViewModel @Inject constructor(
     fun loadAttendance() {
         viewModelScope.launch {
             _isLoading.value = true
-            val userId = "dummy_user"
-            val data = repository.getAttendance(userId)
-            if (data.isEmpty()) {
-                _subjects.value = getMockAttendance()
-            } else {
-                _subjects.value = data
-            }
+            val regNum = settingsDataStore.registrationNumber.first() ?: "12317648"
+            val data = repository.getAttendance(regNum)
+            val finalData = if (data.isEmpty()) getMockAttendance() else data
+            
+            _subjects.value = finalData
+            _overallPercentage.value = AttendanceUtils.calculateOverallPercentage(finalData)
+
             _isLoading.value = false
         }
     }

@@ -5,9 +5,12 @@ data class User(
     val name: String = "",
     val email: String = "",
     val rollNumber: String = "",
+    val registrationNumber: Any? = "",
     val course: String = "",
     val semester: Int = 1,
-    val phone: String = "",
+    val section: String = "",
+    val phone: Any? = "",
     val university: String = "",
-    val profilePictureUrl: String = ""
+    val profilePictureUrl: String = "",
+    val password: Any? = ""
 )

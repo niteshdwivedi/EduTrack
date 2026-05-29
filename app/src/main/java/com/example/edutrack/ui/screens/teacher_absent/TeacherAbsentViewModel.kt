@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,11 +32,11 @@ class TeacherAbsentViewModel @Inject constructor(
             _isLoading.value = true
             val data = repository.getTeacherAbsences()
             if (data.isEmpty()) {
-                // Initial dummy data if Firestore is empty
+                val today = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
                 _absences.value = listOf(
-                    TeacherAbsentEntry("1", "Dr. Smith", "Mathematics", "2023-11-15", "Period 2"),
-                    TeacherAbsentEntry("2", "Prof. Johnson", "Physics", "2023-11-16", "Period 4"),
-                    TeacherAbsentEntry("3", "Ms. Davis", "Computer Science", "2023-11-16", "Period 1")
+                    TeacherAbsentEntry("1", "Dr. Arhaan Roy", "Operating Systems", today, "10:00", "11:30", "Period 1"),
+                    TeacherAbsentEntry("2", "Prof. Sharma", "Python Class", today, "02:00", "03:30", "Period 3"),
+                    TeacherAbsentEntry("3", "Dr. Amit Verma", "Mathematics", today, "09:00", "10:30", "Period 1")
                 )
             } else {
                 _absences.value = data

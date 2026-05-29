@@ -31,6 +31,7 @@ fun AttendanceScreen(
     viewModel: AttendanceViewModel = hiltViewModel()
 ) {
     val subjects by viewModel.subjects.collectAsState()
+    val overallPercentage by viewModel.overallPercentage.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     var selectedSubject by remember { mutableStateOf<SubjectAttendance?>(null) }
     val sheetState = rememberModalBottomSheetState()
@@ -67,7 +68,7 @@ fun AttendanceScreen(
             ) {
                 // Analytics Summary
                 item {
-                    AttendanceSummaryHeader(subjects)
+                    AttendanceSummaryHeader(subjects, overallPercentage)
                 }
 
                 item {
@@ -100,10 +101,9 @@ fun AttendanceScreen(
 }
 
 @Composable
-fun AttendanceSummaryHeader(subjects: List<SubjectAttendance>) {
+fun AttendanceSummaryHeader(subjects: List<SubjectAttendance>, percentage: Int) {
     val totalAttended = subjects.sumOf { it.attended }
     val totalClasses = subjects.sumOf { it.total }
-    val percentage = if (totalClasses > 0) (totalAttended.toFloat() / totalClasses * 100).toInt() else 0
 
     Card(
         modifier = Modifier.fillMaxWidth(),
